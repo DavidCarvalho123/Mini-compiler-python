@@ -1,7 +1,7 @@
 parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
-code: (stat | condicional | func | func_call)* EOF;
+code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF;
 
 stat: (expr | query) NEWLINE;
 
@@ -56,9 +56,9 @@ relacoesEntreExpressoes
 
 
 condicional
-: IF expr COLON stat
-| IF expr COLON stat ELSE COLON stat
-| IF expr COLON stat (ELIF expr COLON stat)+ ELSE COLON stat
+: IF expr COLON stat+
+| IF expr COLON stat+ ELSE COLON stat+
+| IF expr COLON stat+ (ELIF expr COLON stat+)+ ELSE COLON stat+
 ;
 
 func
@@ -79,4 +79,14 @@ param_list
 
 param
     : ID (COLON TYPE)?(ASSIGN expr)?
+    ;
+
+
+
+loop_while
+    : WHILE expr COLON stat+
+    ;
+
+loop_for
+    : FOR ID IN expr COLON stat+
     ;
