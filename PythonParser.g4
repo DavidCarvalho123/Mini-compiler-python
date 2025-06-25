@@ -8,29 +8,23 @@ stat: (expr | query) NEWLINE;
 expr
     : ids
     | numeros
-    | operacoesComExpressoes
-    | expressoesEntreParenteses
+    | expr (PLUS|MINUS|MULT|DIV|FLOOR_DIV|MOD|EXP) expr // operacoesComExpressoes
+    | LPAREN expr RPAREN // expressoesEntreParenteses
     | func_call
     ;
 ids: ID;
 
 numeros: DIGITS;
 
-operacoesComExpressoes
-    : expr (PLUS|MINUS|MULT|DIV|FLOOR_DIV|MOD|EXP) expr;
-
-expressoesEntreParenteses
-    : LPAREN expr RPAREN;
-
-
-
 
 
 query
     : booleans
-    | operacoesBooleanasEntreQuerys
-    | queryEntreParenteses
-    | relacoesEntreExpressoes
+    | query (AND|OR) query //operacoesBooleanasEntreQuerys
+    | NOT query //operacoesBooleanasEntreQuerys
+    | LPAREN query RPAREN
+    | expr (EQ|NEQ|LT|LTE|GT|GTE) expr
+    | func_call
     ;
 
 booleans
@@ -38,27 +32,15 @@ booleans
     | FALSE
     ;
 
-operacoesBooleanasEntreQuerys
-    : query (AND|OR) query
-    | NOT query
-    ;
-
-queryEntreParenteses
-    : LPAREN query RPAREN
-    ;
-
-relacoesEntreExpressoes
-    : expr (EQ|NEQ|LT|LTE|GT|GTE) expr;
-
 
 
 
 
 
 condicional
-: IF expr COLON stat+
-| IF expr COLON stat+ ELSE COLON stat+
-| IF expr COLON stat+ (ELIF expr COLON stat+)+ ELSE COLON stat+
+: IF query COLON stat+
+| IF query COLON stat+ ELSE COLON stat+
+| IF query COLON stat+ (ELIF query COLON stat+)+ ELSE COLON stat+
 ;
 
 func
