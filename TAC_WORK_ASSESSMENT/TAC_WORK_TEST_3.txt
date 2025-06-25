@@ -1,0 +1,15 @@
+10*200.5+-451/(20.5-1)
+True and not False or (5!=2) and 1>3
+if True:
+x+f
+elif False or True:
+2*x
+elif:
+x5
+else:
+True
+def f(x,y,z):
+x+4
+if True:
+x
+return x+y+z

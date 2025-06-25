@@ -34,7 +34,7 @@ EXP_ASSIGN: '**=';
 
 LPAREN: '(';
 RPAREN: ')';
-NEWLINE: '\n';
+NEWLINE: ('\r'?'\n')+;
 COMMA: ',';
 
 // Simbolos identificadores de tipos de dados;
@@ -92,6 +92,5 @@ GLOBAL: 'global';
 TYPE: INT | FLOAT | STRING | BOOL | LIST | DICT | TUPLE | NONE | TRUE | FALSE;
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 LETTER: [a-zA-Z];
-DIGIT: [0-9];
-DIGITS: DIGIT+('.'DIGIT+)?([e|E][+|-]?DIGIT+)? ;
+NUMBER: [0-9]+('.'[0-9]+)?([eE][+|-]?[0-9]+)? ;
 WS: [ \t\r\n]+ -> skip;

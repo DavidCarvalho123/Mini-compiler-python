@@ -1,20 +1,35 @@
 parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
-code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF;
+code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF?;
 
-stat: (expr | query) NEWLINE;
+stat: (expr | query) (NEWLINE | EOF?);
 
 expr
-    : ids
-    | numeros
-    | expr (PLUS|MINUS|MULT|DIV|FLOOR_DIV|MOD|EXP) expr // operacoesComExpressoes
-    | LPAREN expr RPAREN // expressoesEntreParenteses
-    | func_call
+    : expr (PLUS|MINUS) term // operacoesComExpressoes
+    | term 
     ;
+
+term
+    : term (MULT|DIV|FLOOR_DIV|MOD) factor
+    | factor
+    ;
+
+factor
+    : base (EXP factor)?
+    | base
+    ;
+
+base
+    : LPAREN expr RPAREN // expressoesEntreParenteses
+    | func_call
+    | ids
+    | numeros
+    ;
+
 ids: ID;
 
-numeros: DIGITS;
+numeros: NUMBER;
 
 
 
@@ -44,7 +59,7 @@ condicional
 ;
 
 func
-    : DEF ID LPAREN param_list? RPAREN COLON stat+
+    : DEF ID LPAREN param_list? RPAREN COLON stat* return_stmt?
     ;
 
 func_call
@@ -63,6 +78,9 @@ param
     : ID (COLON TYPE)?(ASSIGN expr)?
     ;
 
+return_stmt
+    : RETURN expr? (NEWLINE | EOF)
+    ;
 
 
 loop_while
