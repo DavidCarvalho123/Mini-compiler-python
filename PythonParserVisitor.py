@@ -59,6 +59,11 @@ class PythonParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by PythonParser#assignment.
+    def visitAssignment(self, ctx:PythonParser.AssignmentContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by PythonParser#condicional.
     def visitCondicional(self, ctx:PythonParser.CondicionalContext):
         return self.visitChildren(ctx)

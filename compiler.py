@@ -42,4 +42,4 @@ def main(argv):
 
 if __name__ == '__main__':
     vars = main(sys.argv)
-    print('Source code vars: ', json.dumps(vars, indent=4, separators=(',', ' = ')))
+    print('Source code vars: ', vars)

@@ -89,7 +89,7 @@ GLOBAL: 'global';
 // =========================
 // IDENTIFIERS, LETTERS, DIGITS, WS -> skip
 // =========================
-TYPE: INT | FLOAT | STRING | BOOL | LIST | DICT | TUPLE | NONE | TRUE | FALSE;
+TYPE: INT | FLOAT | STRING | BOOL | LIST | DICT | TUPLE;
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 LETTER: [a-zA-Z];
 NUMBER: [0-9]+('.'[0-9]+)?([eE][+|-]?[0-9]+)? ;

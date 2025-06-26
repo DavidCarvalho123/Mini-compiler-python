@@ -1,2 +1,5 @@
 def f(x):
-    return x**2
+    z = 2
+    y = 3 + z
+    return x * y
+a = f(10)

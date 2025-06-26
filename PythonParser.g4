@@ -3,7 +3,7 @@ options { tokenVocab=PythonLexer; }
 
 code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF?;
 
-stat: (expr | query) (NEWLINE | EOF?);
+stat: (expr | query | assignment) (NEWLINE | EOF?);
 
 expr
     : expr (PLUS|MINUS) term // operacoesComExpressoes
@@ -47,8 +47,9 @@ booleans
     | FALSE
     ;
 
-
-
+assignment
+    : ID (ASSIGN|ADD_ASSIGN|SUB_ASSIGN|MUL_ASSIGN|DIV_ASSIGN|FLOOR_DIV_ASSIGN|MOD_ASSIGN|EXP_ASSIGN) expr
+    ;
 
 
 
