@@ -32,9 +32,10 @@ def main(argv):
         compiler = Compiler()
 
         # Visiting script file via sintax tree
-        compiler.visit(tree)
+        result = compiler.visit(tree)
 
         # Get variables identifyers
+        print(result)
         vars = compiler.vars
 
     return vars

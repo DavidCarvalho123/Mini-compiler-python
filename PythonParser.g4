@@ -16,7 +16,7 @@ term
     ;
 
 factor
-    : base (EXP factor)?
+    : base EXP factor
     | base
     ;
 
