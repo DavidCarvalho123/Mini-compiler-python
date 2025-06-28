@@ -19,19 +19,12 @@ class Compiler(PythonParserVisitor):
     def visitCode(self, ctx:PythonParser.CodeContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         results = []
-        for func in ctx.func():
-            result = self.visit(func)
+
+        for child in ctx.getChildren(): # assures code is ran in order of source code
+            result = self.visit(child)
             if result is not None:
                 results.append(result)
-        for func_call in ctx.func_call():
-            result = self.visit(func_call)
-            if result is not None:
-                results.append(result)
-        for stat in ctx.stat():
-            result = self.visit(stat)
-            if result is not None:
-                results.append(result)
-       
+
         return results
 
 
@@ -75,16 +68,16 @@ class Compiler(PythonParserVisitor):
     # Visit a parse tree produced by PythonParser#factor.
     def visitFactor(self, ctx:PythonParser.FactorContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
-        base = self.visit(ctx.base())
+        if ctx.MINUS():
+            return (ctx.MINUS().getText(), self.visit(ctx.factor()))
         if ctx.EXP():
-            return (ctx.EXP().getText(), base,self.visit(ctx.factor()))
-        return base
+            return (ctx.EXP().getText(), self.visit(ctx.base()) ,self.visit(ctx.factor()))
+        return self.visit(ctx.base())
 
 
     # Visit a parse tree produced by PythonParser#base.
     def visitBase(self, ctx:PythonParser.BaseContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
-
         if ctx.ids():
             print("Found ID:" + ctx.ids().getText())
             return ('ID', ctx.ids().getText())
@@ -95,6 +88,9 @@ class Compiler(PythonParserVisitor):
                 return ('FLOAT',float(textNumber))
             print("Found INT:" + textNumber)
             return ('INT', int(textNumber))
+        elif ctx.stringliteral():
+            print("Found STRING:" + ctx.stringliteral().getText().replace('"', '').replace("'", ''))
+            return ('STRING', ctx.stringliteral().getText().replace('"', '').replace("'", ''))
         elif ctx.expr():
             return self.visit(ctx.expr())
         elif ctx.func_call():
@@ -105,17 +101,17 @@ class Compiler(PythonParserVisitor):
     
     # Visit a parse tree produced by PythonParser#assignment.
     def visitAssignment(self, ctx:PythonParser.AssignmentContext):
-        # Returns FLOAT if value (typically the result of a operation) is decimal, otherwise INT
-        def validateFloatReturnType(value):
-            return 'FLOAT' if isinstance(value,float) else 'INT'
-        
         varName = ctx.ID().getText()
         expr_tree = self.visit(ctx.expr())
         val = self.evaluate_expr(expr_tree) # calculates real value of expr
-        value = (validateFloatReturnType(val), val)
-
+        value = (self.validateReturnType(val), val)
+        print(expr_tree)
         if ctx.ASSIGN():
-            self.vars[varName] = value
+            if expr_tree[0] == 'STRING':
+                expr_tree = (expr_tree[0], expr_tree[1].replace('"', '').replace("'", '')) # clean quotes from string
+                self.vars[varName] = expr_tree
+            else:
+                self.vars[varName] = value
         else:
             if not (isinstance(self.vars.get(varName, 0)[1],(int, float)) and isinstance(value[1], (int, float))):
                 raise TypeError(f"Incompatible types while trying arithmetic assignment {ctx.getText()}")
@@ -125,42 +121,59 @@ class Compiler(PythonParserVisitor):
             dataType = self.vars.get(varName, 0)[1]
             if ctx.ADD_ASSIGN():
                 result = numValMem + numVal
-                self.vars[varName] = (validateFloatReturnType(result), result)
+                self.vars[varName] = (self.validateReturnType(result), result)
             elif ctx.SUB_ASSIGN():
                 result = numValMem - numVal
-                self.vars[varName] = (validateFloatReturnType(result), result)
+                self.vars[varName] = (self.validateReturnType(result), result)
             elif ctx.MUL_ASSIGN():
                 result = numValMem * numVal
-                self.vars[varName] = (validateFloatReturnType(result), result)
+                self.vars[varName] = (self.validateReturnType(result), result)
             elif ctx.DIV_ASSIGN():
                 if numVal == 0:
                     raise ZeroDivisionError(f"Division by zero in {ctx.getText()}")
                 self.vars[varName] = ('FLOAT', numValMem / numVal)
             elif ctx.MOD_ASSIGN():
                 result = numValMem % numVal
-                self.vars[varName] = (validateFloatReturnType(result), result)
+                self.vars[varName] = (self.validateReturnType(result), result)
             elif ctx.FLOOR_DIV_ASSIGN():
                 if numVal == 0:
                     raise ZeroDivisionError(f"Division by zero in {ctx.getText()}")
                 self.vars[varName] = ('FLOAT' if isinstance(numValMem,float) or isinstance(numVal, float) else 'INT', numValMem // numVal)
             elif ctx.EXP_ASSIGN():
                 result = numValMem ** numVal
-                self.vars[varName] = (validateFloatReturnType(result), result)
+                self.vars[varName] = (self.validateReturnType(result), result)
 
         print(f"{varName} updated to {self.vars[varName]}")
         return self.vars[varName]
+
+    def validateReturnType(self, value):
+        if isinstance(value, float):
+            return 'FLOAT'
+        elif isinstance(value, int):
+            return 'INT'
+        elif isinstance(value, str):
+            return 'STRING'
+        elif isinstance(value, bool):
+            return 'BOOL'
+        elif value is None:
+            return 'NONE'
+        else:
+            return 'UNKNOWN'
 
     # Visit a parse tree produced by PythonParser#ids.
     def visitIds(self, ctx:PythonParser.IdsContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         return self.visitChildren(ctx)
 
-
     # Visit a parse tree produced by PythonParser#numeros.
     def visitNumeros(self, ctx:PythonParser.NumerosContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         return self.visitChildren(ctx)
 
+    # Visit a parse tree produced by PythonParser#stringliteral.
+    def visitStringliteral(self, ctx:PythonParser.StringliteralContext):
+        print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
+        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by PythonParser#query.
     def visitQuery(self, ctx:PythonParser.QueryContext):
@@ -171,7 +184,7 @@ class Compiler(PythonParserVisitor):
         elif ctx.NOT():
             return (ctx.NOT().getText(), self.visit(ctx.query(0)))
         elif ctx.AND() or ctx.OR():
-            return (ctx.AND().getText() if ctx.AND() else ctx.OR.getText(), self.visit(ctx.query(0)), self.visit(ctx.query(1)))
+            return (ctx.AND().getText() if ctx.AND() else ctx.OR().getText(), self.visit(ctx.query(0)), self.visit(ctx.query(1)))
         elif ctx.expr():  # expr == expr, etc.
             left = self.visit(ctx.expr(0))
             right = self.visit(ctx.expr(1))
@@ -209,21 +222,23 @@ class Compiler(PythonParserVisitor):
     def visitCondicional(self, ctx:PythonParser.CondicionalContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         ifCond = self.visit(ctx.query(0))
-        if self.verifyBool(ifCond):
-            return [self.visit(stat) for stat in ctx.stat()]
+        if self.verifyBool(self.evaluate_expr(ifCond)):
+            return [self.visit(ctx.stat(0))]
         
         numElifs = len(ctx.ELIF()) if ctx.ELIF() else 0
         for i in range(numElifs):
             elifCond = self.visit(ctx.query(1+i))
-            if self.verifyBool(elifCond):
-                return [self.visit(stat) for stat in ctx.stat(i)]
+            if self.verifyBool(self.evaluate_expr(elifCond)):
+                return [self.visit(ctx.stat(i))]
         
         if ctx.ELSE():
-            return [self.visit(stat) for stat in ctx.stat(numElifs+1)]
+            return [self.visit(ctx.stat(numElifs+1))]
             
-        return self.visitChildren(ctx)
+        return None
 
     def verifyBool(self, value):
+        print("boolean")
+        print(value)
         if isinstance(value, tuple) and len(value) >= 2:
             val = value[1]
             return bool(val)
@@ -296,11 +311,26 @@ class Compiler(PythonParserVisitor):
 
 
     def evaluate_expr(self, expr):
+        print('evaluating...')
+        print(expr)
         if isinstance(expr, tuple):
             op = expr[0]
+            if op == '-' and len(expr) == 2: # gets negative numbers, instead of actual minus operations
+                val = self.evaluate_expr(expr[1])
+                if not isinstance(val, (int, float)):
+                    raise TypeError(f"Unary '-' not supported for type '{type(val).__name__}'")
+                return -val
+            if op == 'and':
+                return self.verifyBool(self.evaluate_expr(expr[1])) and self.verifyBool(self.evaluate_expr(expr[2]))
+            elif op == 'or':
+                return self.verifyBool(self.evaluate_expr(expr[1])) or self.verifyBool(self.evaluate_expr(expr[2]))
+            elif op == 'not':
+                return not self.verifyBool(self.evaluate_expr(expr[1]))
             if op in ('+', '-', '*', '/', '%', '**', '//'):
                 left = self.evaluate_expr(expr[1])
                 right = self.evaluate_expr(expr[2])
+                if not isinstance(left, (int, float)) or not isinstance(right, (int, float)):
+                    raise TypeError("Operands must be numbers")
                 if op == '+': return left + right
                 elif op == '-': return left - right
                 elif op == '*': return left * right
@@ -311,10 +341,18 @@ class Compiler(PythonParserVisitor):
             elif op in ('==', '!=', '<', '<=', '>', '>='):
                 left = self.evaluate_expr(expr[1])
                 right = self.evaluate_expr(expr[2])
+                print(left)
+                print(right)
+                print(op)
+                if op in ('<','<=','>','>=') and (not isinstance(left, (int, float)) or not isinstance(right, (int, float))):
+                    raise TypeError("Operands must be numbers")
+                if self.validateReturnType(left) == 'STRING' and self.validateReturnType(right) == 'STRING':
+                    return eval(f"'{left}' {op} '{right}'")
                 return eval(f"{left} {op} {right}")
             elif op == 'ID':
+                print(self.vars)
                 return self.funcVars.get(expr[1], self.vars.get(expr[1], (None, None)))[1]
-            elif op in ('INT', 'FLOAT', 'BOOL'): # Literal vals, como ('INT', 1)
+            elif op in ('INT', 'FLOAT', 'BOOL', 'STRING'): # Literal vals, como ('INT', 1)
                 return expr[1]
         elif isinstance(expr, (int, float, bool)):
             return expr
@@ -331,12 +369,16 @@ class Compiler(PythonParserVisitor):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         return [self.visit(param) for param in ctx.param()]
 
+    # Visit a parse tree produced by PythonParser#types.
+    def visitTypes(self, ctx:PythonParser.TypesContext):
+        print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
+        return ctx.getText()
 
     # Visit a parse tree produced by PythonParser#param.
     def visitParam(self, ctx:PythonParser.ParamContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         name = ctx.ID().getText()
-        typeParam = ctx.TYPE().getText() if ctx.TYPE() else None
+        typeParam = self.visit(ctx.types()) if ctx.types() else None
         defaultVal = self.evaluate_expr(self.visit(ctx.expr())) if ctx.expr() else None
         print((name,typeParam,defaultVal))
         return (name,typeParam,defaultVal)
@@ -354,16 +396,31 @@ class Compiler(PythonParserVisitor):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
 
         results = []
-        while self.verifyBool(self.visit(ctx.expr())):
-            for stat in ctx.stat():
-                result = self.visit(stat)
-                results.append(result)
+        while self.verifyBool(self.evaluate_expr(self.visit(ctx.query()))):
+            result = self.visit(ctx.stat())
+            results.append(result)
+
         return results
 
 
     # Visit a parse tree produced by PythonParser#loop_for.
     def visitLoop_for(self, ctx:PythonParser.Loop_forContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
-        return self.visitChildren(ctx)
+
+        loopVar = ctx.ID().getText()
+        iterableVal = self.evaluate_expr(self.visit(ctx.expr()))
+        results = []
+        
+        for item in iterableVal: # iterate through iterable
+            print("INSIDE FOR OF FOR")
+            print(('ID' if type(item).__name__ == 'str' else type(item).__name__, item))
+            self.vars[loopVar] = ('ID' if type(item).__name__ == 'str' else type(item).__name__, item) # assing iterated item each time to scoped var
+            
+            result = self.visit(ctx.stat())
+            results.append(result)
+        
+        del self.vars[loopVar] # delete scoped var
+
+        return results
 
 del (PythonParser, PythonParserVisitor)

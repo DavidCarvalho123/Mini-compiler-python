@@ -1,5 +1,4 @@
-def f(x):
-    z = 2
-    y = 3 + z
-    return x * y
-a = f(10)
+if True and False or (5!=2) and 5>3:
+a = 5
+else:
+a = 0

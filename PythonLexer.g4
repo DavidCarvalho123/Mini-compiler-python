@@ -36,6 +36,8 @@ LPAREN: '(';
 RPAREN: ')';
 NEWLINE: ('\r'?'\n')+;
 COMMA: ',';
+QUOTE: '"';
+SINGLE_QUOTE: '\'';
 
 // Simbolos identificadores de tipos de dados;
 // em python os tipos de dados são keywords, não existe declaração explicita de tipo de dados. (int a = 1 -> não funciona em python)
@@ -89,7 +91,6 @@ GLOBAL: 'global';
 // =========================
 // IDENTIFIERS, LETTERS, DIGITS, WS -> skip
 // =========================
-TYPE: INT | FLOAT | STRING | BOOL | LIST | DICT | TUPLE;
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 LETTER: [a-zA-Z];
 NUMBER: [0-9]+('.'[0-9]+)?([eE][+|-]?[0-9]+)? ;

@@ -44,6 +44,11 @@ class PythonParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by PythonParser#stringliteral.
+    def visitStringliteral(self, ctx:PythonParser.StringliteralContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by PythonParser#numeros.
     def visitNumeros(self, ctx:PythonParser.NumerosContext):
         return self.visitChildren(ctx)
@@ -91,6 +96,11 @@ class PythonParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by PythonParser#param.
     def visitParam(self, ctx:PythonParser.ParamContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PythonParser#types.
+    def visitTypes(self, ctx:PythonParser.TypesContext):
         return self.visitChildren(ctx)
 
 

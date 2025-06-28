@@ -1,7 +1,7 @@
 parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
-code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF?;
+code: (func | condicional | loop_while | loop_for | func_call | stat)* EOF?;
 
 stat: (expr | query | assignment) (NEWLINE | EOF?);
 
@@ -17,6 +17,7 @@ term
 
 factor
     : base EXP factor
+    | MINUS factor
     | base
     ;
 
@@ -25,9 +26,12 @@ base
     | func_call
     | ids
     | numeros
+    | stringliteral
     ;
 
 ids: ID;
+
+stringliteral: ((QUOTE ID QUOTE) | (SINGLE_QUOTE ID SINGLE_QUOTE));
 
 numeros: NUMBER;
 
@@ -54,9 +58,8 @@ assignment
 
 
 condicional
-: IF query COLON stat+
-| IF query COLON stat+ ELSE COLON stat+
-| IF query COLON stat+ (ELIF query COLON stat+)+ ELSE COLON stat+
+: IF query COLON NEWLINE? stat
+| IF query COLON NEWLINE? stat (ELIF query COLON NEWLINE? stat)* ELSE COLON NEWLINE? stat
 ;
 
 func
@@ -76,7 +79,11 @@ param_list
     ;
 
 param
-    : ID (COLON TYPE)?(ASSIGN expr)?
+    : ID (COLON types)?(ASSIGN expr)?
+    ;
+
+types
+    : (INT | FLOAT | STRING | BOOL | LIST | DICT | TUPLE)
     ;
 
 return_stmt
@@ -85,9 +92,9 @@ return_stmt
 
 
 loop_while
-    : WHILE query COLON stat+
+    : WHILE query COLON stat
     ;
 
 loop_for
-    : FOR ID IN expr COLON stat+
+    : FOR ID IN expr COLON stat
     ;
