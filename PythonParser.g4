@@ -85,7 +85,7 @@ return_stmt
 
 
 loop_while
-    : WHILE expr COLON stat+
+    : WHILE query COLON stat+
     ;
 
 loop_for

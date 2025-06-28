@@ -352,7 +352,13 @@ class Compiler(PythonParserVisitor):
     # Visit a parse tree produced by PythonParser#loop_while.
     def visitLoop_while(self, ctx:PythonParser.Loop_whileContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
-        return self.visitChildren(ctx)
+
+        results = []
+        while self.verifyBool(self.visit(ctx.expr())):
+            for stat in ctx.stat():
+                result = self.visit(stat)
+                results.append(result)
+        return results
 
 
     # Visit a parse tree produced by PythonParser#loop_for.

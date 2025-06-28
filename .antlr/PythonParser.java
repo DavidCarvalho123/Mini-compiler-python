@@ -1526,8 +1526,8 @@ public class PythonParser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class Loop_whileContext extends ParserRuleContext {
 		public TerminalNode WHILE() { return getToken(PythonParser.WHILE, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
+		public QueryContext query() {
+			return getRuleContext(QueryContext.class,0);
 		}
 		public TerminalNode COLON() { return getToken(PythonParser.COLON, 0); }
 		public List<StatContext> stat() {
@@ -1552,7 +1552,7 @@ public class PythonParser extends Parser {
 			setState(243);
 			match(WHILE);
 			setState(244);
-			expr(0);
+			query(0);
 			setState(245);
 			match(COLON);
 			setState(247); 
@@ -1851,7 +1851,7 @@ public class PythonParser extends Parser {
 		":\u0000\u0000\u00ee\u00f0\u0003\u0004\u0002\u0000\u00ef\u00ee\u0001\u0000"+
 		"\u0000\u0000\u00ef\u00f0\u0001\u0000\u0000\u0000\u00f0\u00f1\u0001\u0000"+
 		"\u0000\u0000\u00f1\u00f2\u0007\u0006\u0000\u0000\u00f2#\u0001\u0000\u0000"+
-		"\u0000\u00f3\u00f4\u0005!\u0000\u0000\u00f4\u00f5\u0003\u0004\u0002\u0000"+
+		"\u0000\u00f3\u00f4\u0005!\u0000\u0000\u00f4\u00f5\u0003\u0010\b\u0000"+
 		"\u00f5\u00f7\u0005\u001d\u0000\u0000\u00f6\u00f8\u0003\u0002\u0001\u0000"+
 		"\u00f7\u00f6\u0001\u0000\u0000\u0000\u00f8\u00f9\u0001\u0000\u0000\u0000"+
 		"\u00f9\u00f7\u0001\u0000\u0000\u0000\u00f9\u00fa\u0001\u0000\u0000\u0000"+
