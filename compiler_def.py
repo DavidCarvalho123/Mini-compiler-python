@@ -52,9 +52,9 @@ class Compiler(PythonParserVisitor):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         term = self.visit(ctx.term())
         if(ctx.PLUS()):
-            return self.evaluate_expr((ctx.PLUS().getText(), self.visit(ctx.expr()), term))
+            return (ctx.PLUS().getText(), self.visit(ctx.expr()), term)
         elif(ctx.MINUS()):
-            return self.evaluate_expr((ctx.MINUS().getText(), self.visit(ctx.expr()), term))
+            return (ctx.MINUS().getText(), self.visit(ctx.expr()), term)
         return term
 
     # Visit a parse tree produced by PythonParser#term.
@@ -62,13 +62,13 @@ class Compiler(PythonParserVisitor):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
         factor = self.visit(ctx.factor())
         if(ctx.MULT()):
-            return self.evaluate_expr((ctx.MULT().getText(), self.visit(ctx.term()), factor))
+            return (ctx.MULT().getText(), self.visit(ctx.term()), factor)
         elif(ctx.DIV()):
-            return self.evaluate_expr((ctx.DIV().getText(), self.visit(ctx.term()), factor))
+            return (ctx.DIV().getText(), self.visit(ctx.term()), factor)
         elif(ctx.MOD()):
-            return self.evaluate_expr((ctx.MOD().getText(), self.visit(ctx.term()), factor))
+            return (ctx.MOD().getText(), self.visit(ctx.term()), factor)
         elif(ctx.FLOOR_DIV()):
-            return self.evaluate_expr((ctx.FLOOR_DIV().getText(), self.visit(ctx.term()), factor))
+            return (ctx.FLOOR_DIV().getText(), self.visit(ctx.term()), factor)
         return factor
 
 
@@ -208,8 +208,26 @@ class Compiler(PythonParserVisitor):
     # Visit a parse tree produced by PythonParser#condicional.
     def visitCondicional(self, ctx:PythonParser.CondicionalContext):
         print('Bem-vindo ' + ctx.getText() + ' ' + str(type(ctx)))
+        ifCond = self.visit(ctx.query(0))
+        if self.verifyBool(ifCond):
+            return [self.visit(stat) for stat in ctx.stat()]
+        
+        numElifs = len(ctx.ELIF()) if ctx.ELIF() else 0
+        for i in range(numElifs):
+            elifCond = self.visit(ctx.query(1+i))
+            if self.verifyBool(elifCond):
+                return [self.visit(stat) for stat in ctx.stat(i)]
+        
+        if ctx.ELSE():
+            return [self.visit(stat) for stat in ctx.stat(numElifs+1)]
+            
         return self.visitChildren(ctx)
 
+    def verifyBool(self, value):
+        if isinstance(value, tuple) and len(value) >= 2:
+            val = value[1]
+            return bool(val)
+        return bool(value)
 
     # Visit a parse tree produced by PythonParser#func.
     def visitFunc(self, ctx:PythonParser.FuncContext):
@@ -259,7 +277,6 @@ class Compiler(PythonParserVisitor):
         if return_stmt:
             result = self.visit(return_stmt.expr()) if return_stmt.expr() else None
 
-        self.funcVars = {}
         return result
 
 
