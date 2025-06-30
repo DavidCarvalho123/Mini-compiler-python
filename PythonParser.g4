@@ -52,7 +52,7 @@ booleans
     ;
 
 assignment
-    : ID (ASSIGN|ADD_ASSIGN|SUB_ASSIGN|MUL_ASSIGN|DIV_ASSIGN|FLOOR_DIV_ASSIGN|MOD_ASSIGN|EXP_ASSIGN) expr
+    : ID (ASSIGN|ADD_ASSIGN|SUB_ASSIGN|MUL_ASSIGN|DIV_ASSIGN|FLOOR_DIV_ASSIGN|MOD_ASSIGN|EXP_ASSIGN) (expr | query)
     ;
 
 
@@ -63,7 +63,7 @@ condicional
 ;
 
 func
-    : DEF ID LPAREN param_list? RPAREN COLON stat* return_stmt?
+    : DEF ID LPAREN param_list? RPAREN COLON NEWLINE? stat* return_stmt?
     ;
 
 func_call
@@ -92,9 +92,9 @@ return_stmt
 
 
 loop_while
-    : WHILE query COLON stat
+    : WHILE query COLON NEWLINE? stat
     ;
 
 loop_for
-    : FOR ID IN expr COLON stat
+    : FOR ID IN expr COLON NEWLINE? stat
     ;

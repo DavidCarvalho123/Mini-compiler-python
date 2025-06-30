@@ -1,0 +1,7 @@
+z = 5+12
+a = 5**2 + 10 * 2 / 2*(5*1)
+10+10
+b = 10
+b += a
+c = "HelloWorld"
+bools = (not False) and 4>3 or 10 != 0 and True

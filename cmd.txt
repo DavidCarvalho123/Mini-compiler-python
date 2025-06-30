@@ -1,0 +1,3 @@
+C:\Users\CarvalhoDEXT\AppData\Local\Programs\Python\Python313\Scripts\antlr4 -Dlanguage=Python3 -no-listener -visitor *.g4
+
+py .\compiler.py .\_sourceCode.txt

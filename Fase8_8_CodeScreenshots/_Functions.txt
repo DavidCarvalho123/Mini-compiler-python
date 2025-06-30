@@ -1,0 +1,7 @@
+a = func(10)
+
+def func(x:int):
+y = x + 2
+return y
+
+b = func(2)

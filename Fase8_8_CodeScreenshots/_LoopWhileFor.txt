@@ -1,0 +1,12 @@
+a = 1
+while a < 20:
+a += 1
+b = 1
+while b < 200:
+b *= a 
+
+c = 0
+for i in 0 + 1 * 5:
+c = c + i
+for j in "teste":
+d = j
